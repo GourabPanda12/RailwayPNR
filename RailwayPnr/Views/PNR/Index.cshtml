@@ -1,0 +1,333 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PNR Status Check</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+        }
+
+        h2 {
+            color: #1a73e8;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .custom-input {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            transition: border-color 0.3s;
+        }
+
+            .custom-input:focus {
+                border-color: #1a73e8;
+                box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+            }
+
+        .btn-primary {
+            background-color: #1a73e8;
+            border: none;
+        }
+
+            .btn-primary:hover {
+                background-color: #0d61cb;
+            }
+
+        .spinner-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .pnr-header {
+            background-color: #f2f7ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #1a73e8;
+        }
+
+            .pnr-header h3 {
+                margin: 0 0 10px 0;
+                color: #1a73e8;
+            }
+
+        .detail-item {
+            background-color: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            height: 100%;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .table-header {
+            background-color: #eef3fd;
+            color: #1a73e8;
+            font-weight: 600;
+        }
+
+        .status-box {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .status-cnf {
+            background-color: #e6f7e6;
+            color: #28a745;
+        }
+
+        .status-rac {
+            background-color: #fff3cd;
+            color: #ffc107;
+        }
+
+        .status-wl {
+            background-color: #f8d7da;
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Indian Railways PNR Status</h2>
+
+        <div class="row mb-4">
+            <div class="col-md-10 mb-2 mb-md-0">
+                <input type="text" id="pnrNumber" class="form-control custom-input" placeholder="Enter 10-digit PNR Number" maxlength="10">
+            </div>
+            <div class="col-md-2">
+                <button id="checkButton" class="btn btn-primary w-100">Check Status</button>
+            </div>
+        </div>
+
+        <div class="spinner-container d-none" id="loader">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+
+        <div class="alert alert-danger d-none" id="errorMessage"></div>
+
+        <div class="d-none" id="resultContainer">
+            <div class="pnr-header">
+                <h3>PNR: <span id="pnrDisplay"></span></h3>
+                <div id="pnrTimestamp" style="font-size: 12px; color: #666;"></div>
+            </div>
+
+            <div class="row row-cols-1 row-cols-md-4 g-3 mb-4">
+                <div class="col">
+                    <div class="detail-item">
+                        <div class="detail-label">Train Number</div>
+                        <div class="detail-value" id="trainNumber"></div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="detail-item">
+                        <div class="detail-label">Train Name</div>
+                        <div class="detail-value" id="trainName"></div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="detail-item">
+                        <div class="detail-label">Date of Journey</div>
+                        <div class="detail-value" id="doj"></div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="detail-item">
+                        <div class="detail-label">From</div>
+                        <div class="detail-value" id="from"></div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="detail-item">
+                        <div class="detail-label">To</div>
+                        <div class="detail-value" id="to"></div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="detail-item">
+                        <div class="detail-label">Class</div>
+                        <div class="detail-value" id="class"></div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="detail-item">
+                        <div class="detail-label">Boarding Point</div>
+                        <div class="detail-value" id="boardingPoint"></div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="detail-item">
+                        <div class="detail-label">Reservation Upto</div>
+                        <div class="detail-value" id="reservationUpto"></div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Passenger Status</h3>
+            <div class="table-responsive">
+                <table class="table table-hover" id="passengerTable">
+                    <thead>
+                        <tr class="table-header">
+                            <th>No.</th>
+                            <th>Booking Status</th>
+                            <th>Current Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="passengerTableBody">
+                        <!-- Passenger rows will be added here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Event handler for button click
+            $("#checkButton").click(function() {
+                getPNRStatus();
+            });
+
+            // Event handler for Enter key
+            $("#pnrNumber").keypress(function(event) {
+                if (event.which === 13) {
+                    getPNRStatus();
+                }
+            });
+
+            function getPNRStatus() {
+                const pnr = $("#pnrNumber").val();
+
+                if (!pnr || pnr.length !== 10 || !/^\d+$/.test(pnr)) {
+                    showError("Please enter a valid 10-digit PNR number");
+                    return;
+                }
+
+                // Show loader
+                $("#loader").removeClass("d-none");
+                $("#resultContainer").addClass("d-none");
+                $("#errorMessage").addClass("d-none");
+
+                $.ajax({
+                    url: '/PNR/GetPNRStatus',
+                    type: 'POST',
+                    data: { pnrNumber: pnr },
+                    dataType: 'json',
+                    success: function(data) {
+                        // Hide loader
+                        $("#loader").addClass("d-none");
+
+                        if (data.status && data.data) {
+                            displayPNRData(data);
+                        } else {
+                            showError(data.message || "Could not retrieve PNR details");
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        // Hide loader
+                        $("#loader").addClass("d-none");
+
+                        let errorMsg = "Something went wrong!";
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMsg = xhr.responseJSON.message;
+                        }
+
+                        showError(errorMsg);
+                        console.error("Error:", error);
+                    }
+                });
+            }
+
+            function displayPNRData(data) {
+                const pnrData = data.data;
+
+                // Set PNR header details
+                $("#pnrDisplay").text(pnrData.pnr);
+
+                // Format and display timestamp
+                const date = new Date(data.timestamp);
+                $("#pnrTimestamp").text(`Last Updated: ${date.toLocaleString()}`);
+
+                // Set train details
+                $("#trainNumber").text(pnrData.trainNo);
+                $("#trainName").text(pnrData.trainName);
+                $("#doj").text(pnrData.doj);
+                $("#from").text(pnrData.from);
+                $("#to").text(pnrData.to);
+                $("#class").text(pnrData.class);
+                $("#boardingPoint").text(pnrData.boardingPoint);
+                $("#reservationUpto").text(pnrData.reservationUpto);
+
+                // Clear existing passenger rows
+                $("#passengerTableBody").empty();
+
+                // Add passenger status rows
+                if (pnrData.passengerStatus && pnrData.passengerStatus.length > 0) {
+                    $.each(pnrData.passengerStatus, function(index, passenger) {
+                        let statusClass = "status-box";
+
+                        if (passenger.currentStatusNew.startsWith("CNF") || passenger.currentStatusNew.startsWith("Confirmed")) {
+                            statusClass += " status-cnf";
+                        } else if (passenger.currentStatusNew.startsWith("RAC")) {
+                            statusClass += " status-rac";
+                        } else if (passenger.currentStatusNew.startsWith("WL")) {
+                            statusClass += " status-wl";
+                        }
+
+                        const row = `
+                            <tr>
+                                <td>${passenger.number}</td>
+                                <td>${passenger.bookingStatus}</td>
+                                <td><span class="${statusClass}">${passenger.currentStatusNew}</span></td>
+                            </tr>
+                        `;
+
+                        $("#passengerTableBody").append(row);
+                    });
+                }
+
+                // Show result container
+                $("#resultContainer").removeClass("d-none");
+            }
+
+            function showError(message) {
+                $("#errorMessage").text(message).removeClass("d-none");
+            }
+        });
+    </script>
+</body>
+</html>
